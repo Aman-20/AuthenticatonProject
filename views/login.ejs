@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        #anything{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>Login!</h1>
+    <form action="/login" method="post">
+        <input type="email" placeholder="email" name="email" required> </br></br>
+        <input type="password" placeholder="password" name="password" required> </br></br>
+        <a href="/forgot">Forgot Password?</a> </br></br>
+        <input type="submit"> </br> </br>
+    </form>
+
+    <a href="/register">Don't have Account?</a>
+    
+    <% if (error) { %>
+        <p id="anything"><%= error %></p>
+    <% } %>
+
+</body>
+</html>

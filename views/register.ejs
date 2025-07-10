@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        .dj {
+            display: flex;
+            justify-content: center;
+            align-items:center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dj">
+        <h1>Register!</h1>
+        <form action="/register" method="post" enctype="multipart/form-data">
+            <input type="text" placeholder="name" name="name" required> </br></br>
+            <input type="email" placeholder="email" name="email" required> </br></br>
+            <input type="password" placeholder="password" name="password" required> </br></br>
+            <input type="file" name="file"> </br></br>
+            <input type="submit"> </br></br>
+            <a href="/login">Already have Account?</a>
+        </form>
+
+    </div>
+</body>
+
+</html>
