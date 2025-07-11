@@ -1,19 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-</head>
-<body>
-    <h1>Welcome! </h1>
-    <h3>Your Name: <%=name%> </h3>
-    <h4>Your Email: <%=email%> </h4>
-    <img src="<%=imgurl%>" height="350px" width="350px"> </br> </br>
+    <style>
+        body{
+            overflow-x: hidden;
+        }
+        #page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            gap: 20px;
+        
+        }
 
-    <form action="/logout" method="get">
-        <input type="submit" value="logout">
-    </form>
-    
+        #profile {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #info{
+            word-wrap: break-word;
+        }
+        @media (max-width: 400px){
+            #info{
+                font-size: 13px;
+            }
+        }
+         @media (max-width: 300px){
+            #info{
+                font-size: 10px;
+            }
+        }
+
+        #btn {
+            display: flex;
+            gap: 150px;
+            margin-top: 3vh;
+        }
+        @media (max-width:300px){
+            #btn{
+                gap: 100px;
+            }
+        }
+        @media (max-width:250px){
+            #btn{
+                gap: 50px;
+            }
+        }
+
+        #img{
+            height: 200px;
+            width: 200px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        #img img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @media (max-width: 400px){
+            #img{
+                height: 150px;
+                width: 150px;
+            }
+        }
+        @media (max-width: 300px){
+            #img{
+                height: 100px;
+                width: 100px;
+            }
+        }
+        @media (max-width: 250px){
+            #img{
+                height: 80px;
+                width: 80px;
+            }
+        }
+
+        #navbar {
+            display: flex;
+            gap: 10vh;
+        }
+        @media (max-width:300px){
+            #navbar{
+                gap: 3vh;
+            }
+        }
+        h1{
+            margin-bottom: 0;
+        }
+        #build{
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="page">
+
+        <h1>Welcome! </h1>
+
+        <div id="navbar">
+            <a href="/">Change Avatar</a>
+            <a href="/">Change Name</a>
+            <a href="/">Reset Password</a>
+        </div>
+
+        <div id="profile">
+
+            <div id="img">
+                <img src="<%=imgurl%>"> </br> </br>
+            </div>
+
+            <div id="info">
+                <h3>Name: <%=name%></h3>
+                <h3>Email: <%=email%></h3>
+                <h3>Member Since: Jan 2024</h3>
+                <h3>Last Login: 10:45 AM</h3>
+            </div>
+
+        </div>
+
+        <h4 id="build">"Keep building. You're getting better every day"</h4>
+
+        <div id="btn">
+
+            <form action="/logout" method="get">
+                <input type="submit" value="Logout">
+            </form>
+
+            <input type="button" value="MyFiles">
+
+        </div>
+
+        <a href="/">Delete-Account</a>
+
+    </div>
+
 </body>
+
 </html>

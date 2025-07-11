@@ -14,7 +14,7 @@ const forgotPasswordLimiter = ratelimit({
     windowMs:15*60*1000,
     max:2,
     handler: (req, res)=>{
-        res.status(429).render("forgot.ejs", {message:"to many requests"});
+        res.status(429).render("forgot.ejs", {message:"To Many Requests, try after 60sec!!!"});
     }
 });
 
@@ -226,5 +226,5 @@ app.get('/logout', (req, res) => {
 });
 
 app.listen(PORT, (req, res) => {
-    console.log("server is running");
+    console.log(`Server is running on port ${PORT}`);
 });

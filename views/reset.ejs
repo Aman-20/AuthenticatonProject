@@ -5,16 +5,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>forgot-password</title>
+    <style>
+        #box {
+            border: 1px solid black;
+            width: fit-content;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #parent {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>Reset Password</h2>  </br>
-    <form action="/reset/<%= token %>" method="post">
-        <input type="password" placeholder="enter new password" name="newPassword" required> </br></br>
-        <p>Tips: Use combination of letter number and symbols</p> </br></br>
-        <input type="submit" value="Reset">
-    </form>
-
+    <div id="parent">
+        <div id="box">
+            <h2>Reset Password</h2> </br>
+            <form action="/reset/<%= token %>" method="post">
+                <input type="password" placeholder="Enter New Password" name="newPassword" required> </br></br>
+                <p>Tips: Use combination of letter number and symbols</p> </br></br>
+                <input type="submit" value="Reset">
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

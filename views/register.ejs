@@ -9,24 +9,34 @@
         .dj {
             display: flex;
             justify-content: center;
-            align-items:center;
+            align-items: center;
             flex-direction: column;
+            border: 1px solid black;
+            width: fit-content;
+            padding: 25px;
+        }
+        #parent{
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
 
 <body>
-    <div class="dj">
-        <h1>Register!</h1>
-        <form action="/register" method="post" enctype="multipart/form-data">
-            <input type="text" placeholder="name" name="name" required> </br></br>
-            <input type="email" placeholder="email" name="email" required> </br></br>
-            <input type="password" placeholder="password" name="password" required> </br></br>
-            <input type="file" name="file"> </br></br>
-            <input type="submit"> </br></br>
-            <a href="/login">Already have Account?</a>
-        </form>
+    <div id="parent">
+        <div class="dj">
+            <h1>Register!</h1>
+            <form action="/register" method="post" enctype="multipart/form-data">
+                Name: <input type="text" placeholder="Enter Your Name" name="name" required> </br></br>
+                Email: <input type="email" placeholder="Enter Your Email" name="email" required> </br></br>
+                Password: <input type="password" placeholder="Enter Your Password" name="password" required> </br></br>
+                Upload Your Image Here: </br></br>
+                <input type="file" name="file"> </br></br>
+                <input type="submit"> </br></br>
+                <a href="/login">Already have Account?</a>
+            </form>
 
+        </div>
     </div>
 </body>
 
