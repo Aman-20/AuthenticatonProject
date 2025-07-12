@@ -111,9 +111,9 @@
         <h1>Welcome! </h1>
 
         <div id="navbar">
-            <a href="/">Change Avatar</a>
-            <a href="/">Change Name</a>
-            <a href="/">Reset Password</a>
+            <a href="/change">Change Avatar</a>
+            <a href="/update">Change Name</a>
+            <a href="/forgot">Reset Password</a>
         </div>
 
         <div id="profile">
@@ -125,8 +125,8 @@
             <div id="info">
                 <h3>Name: <%=name%></h3>
                 <h3>Email: <%=email%></h3>
-                <h3>Member Since: Jan 2024</h3>
-                <h3>Last Login: 10:45 AM</h3>
+                <h3>Member Since: <%=createdAt%></h3>
+                <h3>Last Login: <%=lastLogin%></h3>
             </div>
 
         </div>
@@ -143,7 +143,7 @@
 
         </div>
 
-        <a href="/">Delete-Account</a>
+        <a href="/delete">Delete-Account</a>
 
     </div>
 

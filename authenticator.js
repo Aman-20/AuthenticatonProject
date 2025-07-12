@@ -9,12 +9,13 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import ratelimit from 'express-rate-limit'
+import { type } from 'os';
 
 const forgotPasswordLimiter = ratelimit({
-    windowMs:15*60*1000,
-    max:2,
-    handler: (req, res)=>{
-        res.status(429).render("forgot.ejs", {message:"To Many Requests, try after 60sec!!!"});
+    windowMs: 15 * 60 * 1000,
+    max: 2,
+    handler: (req, res) => {
+        res.status(429).render("forgot.ejs", { message: "To Many Requests, try after 60sec!!!" });
     }
 });
 
@@ -40,9 +41,18 @@ const define = mongoose.Schema({
     email: String,
     password: String,
     imgurl: String,
+    public_id: String,
     resetToken: String,
     resetTokenExpire: Date,
-    lastResetRequest: Date
+    lastResetRequest: Date,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    lastLogin: {
+        type: Date,
+        default: null
+    },
 });
 
 const section = mongoose.model('yoyo', define);
@@ -58,7 +68,7 @@ app.get('/', async (req, res) => {
     if (token) {
         const decode = jwt.verify(token, process.env.JWT_SECRET);
         req.aman = await section.findById(decode.id);
-        res.render("logout.ejs", { name: req.aman.name, email: req.aman.email, imgurl: req.aman.imgurl });
+        res.render("logout.ejs", { name: req.aman.name, email: req.aman.email, imgurl: req.aman.imgurl, createdAt: req.aman.createdAt, lastLogin: req.aman.lastLogin });
     } else {
         res.render("login.ejs", { error: null });
     }
@@ -83,7 +93,8 @@ app.post('/register', upload.single('file'), (req, res) => {
                 name: req.body.name,
                 email: req.body.email,
                 password: hashpass,
-                imgurl: result.secure_url
+                imgurl: result.secure_url,
+                public_id: result.public_id,
             }
 
             let user = await section.findOne({ email: obj.email });
@@ -116,6 +127,9 @@ app.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.render("login.ejs", { error: "wrong password" });
 
+    user.lastLogin = new Date();
+    await user.save();
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     res.cookie('token', token, {
@@ -126,19 +140,19 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/forgot', (req, res) => {
-    res.render("forgot.ejs", {message:null});
+    res.render("forgot.ejs", { message: null });
 });
 
 
-app.post('/forgot',forgotPasswordLimiter, async(req, res)=>{
+app.post('/forgot', forgotPasswordLimiter, async (req, res) => {
     try {
         const email = req.body.email;
-        const user = await section.findOne({email});
-        if(!user) return res.status(404).render("forgot.ejs", {message:"User Not Found!"})
+        const user = await section.findOne({ email });
+        if (!user) return res.status(404).render("forgot.ejs", { message: "User Not Found!" })
 
         const now = Date.now();
-        if(user.lastResetRequest && now - user.lastResetRequest < 60*1000){
-            return res.status(429).render("forgot.ejs", {message:"Too many requests! Try again after sometimes."});
+        if (user.lastResetRequest && now - user.lastResetRequest < 60 * 1000) {
+            return res.status(429).render("forgot.ejs", { message: "Too many requests! Try again after sometimes." });
         }
         user.lastResetRequest = now;
 
@@ -154,10 +168,10 @@ app.post('/forgot',forgotPasswordLimiter, async(req, res)=>{
         console.log(resetURL);
 
         const transporter = nodemailer.createTransport({
-            service:"gmail",
+            service: "gmail",
             auth: {
-                user:process.env.EMAIL_USER,
-                pass:process.env.EMAIL_PASS
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         });
 
@@ -168,7 +182,7 @@ app.post('/forgot',forgotPasswordLimiter, async(req, res)=>{
         });
 
         res.send("reset link sent to email");
-        
+
     } catch (error) {
         res.status(200).send("some error occured");
         console.log(error);
@@ -177,31 +191,31 @@ app.post('/forgot',forgotPasswordLimiter, async(req, res)=>{
 
 
 
-app.get('/reset/:token', async(req, res)=>{
+app.get('/reset/:token', async (req, res) => {
     const token = req.params.token;
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await section.findOne({
         resetToken: hashedToken,
-        resetTokenExpire: {$gt:Date.now()}
+        resetTokenExpire: { $gt: Date.now() }
     });
 
-    if(!user) return res.send("Invailed or expired token");
+    if (!user) return res.send("Invailed or expired token");
 
-    res.render('reset.ejs', {token: req.params.token});
+    res.render('reset.ejs', { token: req.params.token });
 });
 
 
 
-app.post('/reset/:token', async(req, res)=>{
+app.post('/reset/:token', async (req, res) => {
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
     const user = await section.findOne({
         resetToken: hashedToken,
-        resetTokenExpire: {$gt:Date.now()}
+        resetTokenExpire: { $gt: Date.now() }
     });
 
-    if(!user) return res.send("token expired or invailed");
+    if (!user) return res.send("token expired or invailed");
 
     const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
 
@@ -214,6 +228,116 @@ app.post('/reset/:token', async(req, res)=>{
 
     res.send("password changed successfully");
 });
+
+app.get('/update', (req, res) => {
+    res.render("update.ejs");
+});
+
+app.get('/delete', (req, res) => {
+    res.render("delete.ejs");
+});
+
+app.get('/change', (req, res) => {
+    res.render("change.ejs");
+});
+
+
+app.post('/change', upload.single('file'), async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.redirect('/login');
+
+    try {
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await section.findById(decode.id);
+        if (!user) return res.status(404).send("user not found");
+
+        if (req.file) {
+
+            if (user.public_id) {
+                await cloudinary.uploader.destroy(user.public_id);
+                console.log("old image deleted");
+            }
+
+            const result = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream({ folder: "fakeauthenticator" }, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return reject(error)
+                    }
+                    resolve(result);
+
+                }).end(req.file.buffer);
+            });
+            
+            user.imgurl = result.secure_url;
+            user.public_id = result.public_id;
+            
+            await user.save();
+            
+            res.redirect('/');
+
+        }
+    } catch (error) {
+        res.status(500).send("server error");
+        console.log(error);
+    }
+
+})
+
+
+app.post('/update', async (req, res) => {
+
+    const token = req.cookies.token;
+    if (!token) return res.redirect('/login');
+
+    try {
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await section.findById(decode.id);
+        if (!user) return res.status(404).send("user not found");
+
+        const name = req.body.name;
+        user.name = name;
+        await user.save();
+
+        res.redirect('/')
+
+    } catch (error) {
+        res.status(500).send("server error");
+        console.log(error);
+
+    }
+})
+
+
+app.post('/delete', async (req, res) => {
+
+    const token = req.cookies.token;
+    if (!token) return res.redirect('/login');
+
+    try {
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await section.findById(decode.id);
+        if (!user) return res.status(404).send("user not found");
+
+        const password = req.body.password;
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.render("login.ejs", { error: "wrong password" });
+
+        if (user.public_id) {
+            await cloudinary.uploader.destroy(user.public_id);
+        }
+
+        await section.findByIdAndDelete(user._id);
+
+        res.clearCookie('token');
+        res.redirect('/');
+
+    } catch (error) {
+        res.status(500).send("server error");
+        console.log(error);
+
+    }
+})
 
 
 
