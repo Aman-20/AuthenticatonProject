@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My-Files</title>
+</head>
+<body>
+    <h2>Upload your files here:</h2>
+    <form action="/files" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple>
+        <input type="submit" value="Upload">
+    </form>
+
+    <br> <hr>
+
+<h3>Your Files</h3>
+<ul>
+    <% files.forEach(file => { %>
+        <li>
+            <p><%= file.originalName %> (<%= file.format %>)</p>
+
+            <% if (file.type === 'image') { %>
+                <img src="<%= file.url %>" width="200" />
+            <% } else if (file.type === 'video') { %>
+                <video src="<%= file.url %>" width="300" controls></video>
+            <% } else if (file.type === 'audio') { %>
+                <audio src="<%= file.url %>" controls></audio>
+            <% } else { %>
+                <a href="<%= file.url %>" target="_blank">View Document</a>
+            <% } %>
+
+            <form action="/files/delete/<%= file._id %>" method="POST" style="display:inline;">
+                <button type="submit" onclick="return confirm('Delete this file?')">Delete</button>
+            </form>
+            
+        </li>
+    <% }) %>
+</ul>
+
+<hr> <br>
+
+<button> <a href="/" style="text-decoration: none;">Go Back</a> </button>
+
+</body>
+</html>

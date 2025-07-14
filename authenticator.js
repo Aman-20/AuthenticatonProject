@@ -69,6 +69,24 @@ const otpschema = mongoose.Schema({
     }
 });
 
+const fileSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'yoyo',
+        required: true
+    },
+    url: String,
+    public_id: String,
+    type: String,           // 'image', 'video', 'raw', etc.
+    format: String,         // 'jpg', 'mp4', 'pdf', etc.
+    originalName: String,
+    uploadedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const File = mongoose.model('File', fileSchema);
 const otpModel = mongoose.model('otp', otpschema);
 const section = mongoose.model('yoyo', define);
 
@@ -408,13 +426,73 @@ app.post('/delete', async (req, res) => {
     }
 })
 
-app.get('/file', (req, res)=>{
-    res.render("file.ejs");
-})
+app.get('/files', async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.redirect('/login');
 
-app.post('/file', upload.array('files') ,async(req, res)=>{
-    res.send("/");
+    try {
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+
+        const files = await File.find({ user: decode.id }).sort({ uploadedAt: -1 });
+
+        res.render('files.ejs', { files });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error loading files");
+    }
 });
+
+
+app.post('/files', upload.array('files', 10), async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.redirect('/login');
+
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await section.findById(decode.id);
+    if (!user) return res.status(404).send("User not found");
+
+    for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+                { folder: "userFiles", resource_type: "auto" },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                }
+            ).end(file.buffer);
+        });
+
+        await File.create({
+            user: user._id,
+            url: result.secure_url,
+            public_id: result.public_id,
+            type: result.resource_type,
+            format: result.format,
+            originalName: file.originalname
+        });
+    }
+
+    res.redirect('/files');
+});
+
+
+app.post('/files/delete/:id', async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.redirect('/login');
+
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    const file = await File.findOne({ _id: req.params.id, user: decode.id });
+    if (!file) return res.status(404).send("File not found");
+
+    await cloudinary.uploader.destroy(file.public_id, {
+        resource_type: file.type === 'video' || file.type === 'audio' ? file.type : 'image'
+    });
+
+    await File.deleteOne({ _id: file._id });
+
+    res.redirect('/files');
+});
+
 
 app.get('/logout', (req, res) => {
     res.cookie('token', null, {
