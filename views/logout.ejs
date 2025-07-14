@@ -6,16 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
-        body{
+        body {
             overflow-x: hidden;
         }
+
         #page {
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100vh;
             gap: 20px;
-        
+
         }
 
         #profile {
@@ -25,16 +26,18 @@
             align-items: center;
         }
 
-        #info{
+        #info {
             word-wrap: break-word;
         }
-        @media (max-width: 400px){
-            #info{
+
+        @media (max-width: 400px) {
+            #info {
                 font-size: 13px;
             }
         }
-         @media (max-width: 300px){
-            #info{
+
+        @media (max-width: 300px) {
+            #info {
                 font-size: 10px;
             }
         }
@@ -44,43 +47,48 @@
             gap: 150px;
             margin-top: 3vh;
         }
-        @media (max-width:300px){
-            #btn{
+
+        @media (max-width:300px) {
+            #btn {
                 gap: 100px;
             }
         }
-        @media (max-width:250px){
-            #btn{
+
+        @media (max-width:250px) {
+            #btn {
                 gap: 50px;
             }
         }
 
-        #img{
+        #img {
             height: 200px;
             width: 200px;
             overflow: hidden;
             border-radius: 12px;
         }
-        #img img{
+
+        #img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        @media (max-width: 400px){
-            #img{
+        @media (max-width: 400px) {
+            #img {
                 height: 150px;
                 width: 150px;
             }
         }
-        @media (max-width: 300px){
-            #img{
+
+        @media (max-width: 300px) {
+            #img {
                 height: 100px;
                 width: 100px;
             }
         }
-        @media (max-width: 250px){
-            #img{
+
+        @media (max-width: 250px) {
+            #img {
                 height: 80px;
                 width: 80px;
             }
@@ -90,15 +98,18 @@
             display: flex;
             gap: 10vh;
         }
-        @media (max-width:300px){
-            #navbar{
+
+        @media (max-width:300px) {
+            #navbar {
                 gap: 3vh;
             }
         }
-        h1{
+
+        h1 {
             margin-bottom: 0;
         }
-        #build{
+
+        #build {
             text-align: center;
         }
     </style>
@@ -139,7 +150,9 @@
                 <input type="submit" value="Logout">
             </form>
 
-            <input type="button" value="MyFiles">
+            <form action="/file" method="get">
+                <input type="submit" value="MyFiles">
+            </form>
 
         </div>
 

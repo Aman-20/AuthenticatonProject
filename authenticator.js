@@ -55,6 +55,21 @@ const define = mongoose.Schema({
     },
 });
 
+const otpschema = mongoose.Schema({
+    name: String,
+    email: String,
+    password: String,
+    imgbuffer: Buffer,
+    imgtype: String,
+    otp: String,
+    otpMade: {
+        type: Date,
+        default: Date.now(),
+        expires: 300,
+    }
+});
+
+const otpModel = mongoose.model('otp', otpschema);
 const section = mongoose.model('yoyo', define);
 
 const storage = multer.memoryStorage();
@@ -82,37 +97,91 @@ app.get('/login', (req, res) => {
     res.render("login.ejs", { error: null });
 });
 
-app.post('/register', upload.single('file'), (req, res) => {
+app.post('/register', upload.single('file'), async (req, res) => {
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+
+    let user = await section.findOne({ email });
+    if (user) return res.render("login.ejs", { error: "user alreay exist" });
+
+    const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+
+    const hashpass = await bcrypt.hash(password, 10);
+
+    await otpModel.findOneAndDelete({ email });
+
+    await otpModel.create({
+        name,
+        email,
+        password: hashpass,
+        imgbuffer: req.file.buffer,
+        imgtype: req.file.mimetype,
+        otp
+    });
+
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    await transporter.sendMail({
+        to: email,
+        subject: "OTP Verification",
+        html: `<p> Your OTP is "${otp}", it will expire in 5 miutes </p>`
+    });
+
+    res.render("otp.ejs", { email, message: "OTP sent to your email" });
+})
+
+
+app.post('/verify-otp', upload.single('file'), async (req, res) => {
     try {
-        cloudinary.uploader.upload_stream({ folder: "fakeauthenticator" }, async (error, result) => {
-            console.log(result);
-            console.log("file uploaded!");
 
-            const hashpass = await bcrypt.hash(req.body.password, 10);
-            const obj = {
-                name: req.body.name,
-                email: req.body.email,
-                password: hashpass,
-                imgurl: result.secure_url,
-                public_id: result.public_id,
-            }
+        const otp = req.body.otp;
+        const email = req.body.email;
 
-            let user = await section.findOne({ email: obj.email });
-            if (user) return res.render("login.ejs", { error: "user alreay exist" });
+        const pending = await otpModel.findOne({ email });
+        if (!pending) return res.render("login.ejs", { error: "OTP expired or invalid" });
 
-            user = await section.create(obj);
+        if (pending.otp !== otp) {
+            return res.render("otp.ejs", { email, message: "Invalid OTP" });
+        }
 
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+                { folder: "fakeauthenticator" },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                }
 
-            res.cookie('token', token, {
-                httpOnly: true,
-                expires: new Date(Date.now() + 5 * 60 * 1000)
-            });
+            ).end(pending.imgbuffer);
+        });
 
-            res.redirect('/');
+        const user = await section.create({
+            name: pending.name,
+            email: pending.email,
+            password: pending.password,
+            imgurl: result.secure_url,
+            public_id: result.public_id,
+        });
 
-        }).end(req.file.buffer);
+        await otpModel.findOneAndDelete({ email });
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        res.cookie('token', token, {
+            httpOnly: true,
+            expires: new Date(Date.now() + 5 * 60 * 1000)
+        });
+
+        res.redirect('/');
+
     } catch (error) {
+        console.log(error);
         res.status(500).render("login.ejs", { error: "something went wrong" });
     }
 });
@@ -268,12 +337,12 @@ app.post('/change', upload.single('file'), async (req, res) => {
 
                 }).end(req.file.buffer);
             });
-            
+
             user.imgurl = result.secure_url;
             user.public_id = result.public_id;
-            
+
             await user.save();
-            
+
             res.redirect('/');
 
         }
@@ -339,7 +408,13 @@ app.post('/delete', async (req, res) => {
     }
 })
 
+app.get('/file', (req, res)=>{
+    res.render("file.ejs");
+})
 
+app.post('/file', upload.array('files') ,async(req, res)=>{
+    res.send("/");
+});
 
 app.get('/logout', (req, res) => {
     res.cookie('token', null, {
