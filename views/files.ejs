@@ -30,9 +30,12 @@
                 <a href="<%= file.url %>" target="_blank">View Document</a>
             <% } %>
 
+            <div id="button">
             <form action="/files/delete/<%= file._id %>" method="POST" style="display:inline;">
                 <button type="submit" onclick="return confirm('Delete this file?')">Delete</button>
             </form>
+            <button> <a href="<%= file.url %>" style="text-decoration: none;" > Share </a> </button>
+            </div>
             
         </li>
     <% }) %>

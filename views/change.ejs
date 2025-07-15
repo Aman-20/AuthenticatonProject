@@ -1,15 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Change-Avatar</title>
+    <style>
+        #data {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid black;
+            width: fit-content;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #data1 {
+            display: flex;
+            justify-content: center;
+        }
+        p{
+            color: green;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Chnage your Avatar:</h2>
-    <form action="/change" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*">
-        <button type="submit">Change-Avatar</button>
-    </form>
+    <div id="data1">
+        <div id="data">
+            <h2>Chnage your Avatar:</h2>
+            <form action="/change" method="post" enctype="multipart/form-data">
+                <div id="ava">
+                    <input type="file" name="file" accept="image/*" required> <br> <br>
+                    <button type="submit">Change-Avatar</button>
+                </div>
+            </form>
+            <p>Note: Select Images only to change your profile picture and keep image less than 1MB </p>
+        </div>
+    </div>
+    
 </body>
+
 </html>

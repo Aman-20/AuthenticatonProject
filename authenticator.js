@@ -193,7 +193,7 @@ app.post('/verify-otp', upload.single('file'), async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
         res.cookie('token', token, {
             httpOnly: true,
-            expires: new Date(Date.now() + 5 * 60 * 1000)
+            expires: new Date(Date.now() + 60 * 60 * 1000)
         });
 
         res.redirect('/');
