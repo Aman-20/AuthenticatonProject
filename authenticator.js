@@ -3,25 +3,32 @@ import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import dotenv from 'dotenv';
+dotenv.config()
+
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import ratelimit from 'express-rate-limit'
-import { type } from 'os';
+
+
+
+const app = express();
+app.set('trust proxy', 1); 
 
 const forgotPasswordLimiter = ratelimit({
     windowMs: 15 * 60 * 1000,
-    max: 2,
+    limit: 2,
+    standardHeaders: true,
+    legacyHeaders: false,
     handler: (req, res) => {
-        res.status(429).render("forgot.ejs", { message: "To Many Requests, try after 60sec!!!" });
+        res.status(429).render("forgot.ejs", {
+            message: "Too many requests, please try again after 15 minutes."
+        });
     }
 });
 
-dotenv.config()
-
-const app = express();
 app.set("view engine", "ejs");
 
 const PORT = process.env.PORT || 3000;
